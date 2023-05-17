@@ -12,6 +12,7 @@ export const Button = styled("button", {
       accent: { background: "slateblue" },
     },
     size: {
+      smallest: { padding: 6 },
       small: { padding: 12 },
       medium: { padding: 16 },
       large: { padding: 24 },

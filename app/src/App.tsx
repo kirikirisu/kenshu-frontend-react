@@ -1,9 +1,9 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useListTasks,
-  getListTasksQueryOptions,
   getListTasksQueryKey,
+  useUpdateTask,
   useCreateTask,
 } from "./generated";
 import { style } from "@macaron-css/core";
@@ -11,21 +11,114 @@ import { Button } from "./Button";
 
 const TodoList = () => {
   const { data } = useListTasks();
+  const queryClient = useQueryClient();
+  const { mutate } = useUpdateTask({
+    mutation: {
+      onSuccess: (result) => {
+        const additionalTask = result.data.task;
+
+        queryClient.setQueryData(getListTasksQueryKey(), (prevState: any) => {
+          const prevTaskList = prevState.data.tasks;
+
+          const nextTaskList = prevTaskList.map((task) => {
+            if (task.id === additionalTask.id) return additionalTask;
+            return task;
+          });
+
+          const nextState = {
+            ...prevState,
+            data: { tasks: nextTaskList },
+          };
+          setEditTodoId("");
+
+          return nextState;
+        });
+      },
+    },
+  });
+
+  const [editTodoId, setEditTodoId] = useState<string | undefined>();
+  const [inputText, setInputText] = useState<string | undefined>(undefined);
 
   return (
     <ul className={style({ marginTop: "25px", paddingLeft: "0" })}>
-      {data.data.tasks.map((task) => (
-        <li
-          className={style({
-            padding: "15px",
-            borderBottom: "1px solid #EBEBEB",
-            listStyle: "none",
-          })}
-          key={task.id}
-        >
-          {task.title}
-        </li>
-      ))}
+      {data.data.tasks.map((task) => {
+        if (task.id === editTodoId) {
+          return (
+            <div
+              key={task.id}
+              className={style({
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "15px",
+                borderBottom: "1px solid #EBEBEB",
+              })}
+            >
+              <input
+                value={inputText === undefined ? task.title : inputText}
+                onChange={(e) => setInputText(e.target.value)}
+              />
+              <div>
+                <Button
+                  color="netoral"
+                  size="smallest"
+                  onClick={() => {
+                    setInputText(undefined);
+                    setEditTodoId(undefined);
+                  }}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  color="netoral"
+                  size="smallest"
+                  onClick={() => {
+                    mutate({ taskId: task.id, data: { title: inputText } });
+                    setInputText(undefined);
+                    setEditTodoId(undefined);
+                  }}
+                >
+                  決定
+                </Button>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div
+            className={style({
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "15px",
+              borderBottom: "1px solid #EBEBEB",
+            })}
+            key={task.id}
+          >
+            <li
+              className={style({
+                listStyle: "none",
+              })}
+            >
+              {task.title}
+            </li>
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                setEditTodoId(task.id);
+              }}
+              color="netoral"
+              size="smallest"
+            >
+              編集
+            </Button>
+          </div>
+        );
+      })}
     </ul>
   );
 };
@@ -88,7 +181,7 @@ export const App = () => {
             mutate();
           }}
         >
-          Create ToDo
+          ToDoを作成
         </Button>
         <Suspense fallback={<div>Now Loading...</div>}>
           <TodoList />
