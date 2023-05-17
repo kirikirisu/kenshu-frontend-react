@@ -45,7 +45,7 @@ const TodoList = () => {
       {data.data.tasks.map((task) => {
         if (task.id === editTodoId) {
           return (
-            <div
+            <li
               key={task.id}
               className={style({
                 display: "flex",
@@ -83,12 +83,12 @@ const TodoList = () => {
                   決定
                 </Button>
               </div>
-            </div>
+            </li>
           );
         }
 
         return (
-          <div
+          <li
             className={style({
               display: "flex",
               flexDirection: "row",
@@ -99,13 +99,13 @@ const TodoList = () => {
             })}
             key={task.id}
           >
-            <li
+            <p
               className={style({
                 listStyle: "none",
               })}
             >
               {task.title}
-            </li>
+            </p>
             <Button
               onClick={(e) => {
                 e.preventDefault();
@@ -116,7 +116,7 @@ const TodoList = () => {
             >
               編集
             </Button>
-          </div>
+          </li>
         );
       })}
     </ul>
