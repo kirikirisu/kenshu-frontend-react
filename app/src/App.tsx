@@ -1,17 +1,25 @@
 import { Suspense } from "react";
-import { useListTasks } from "./generated";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  useListTasks,
+  getListTasksQueryOptions,
+  getListTasksQueryKey,
+  useCreateTask,
+} from "./generated";
 import { style } from "@macaron-css/core";
+import { Button } from "./Button";
 
 const TodoList = () => {
   const { data } = useListTasks();
 
   return (
-    <ul className={style({ marginTop: "25px" })}>
+    <ul className={style({ marginTop: "25px", paddingLeft: "0" })}>
       {data.data.tasks.map((task) => (
         <li
           className={style({
             padding: "15px",
             borderBottom: "1px solid #EBEBEB",
+            listStyle: "none",
           })}
           key={task.id}
         >
@@ -23,6 +31,24 @@ const TodoList = () => {
 };
 
 export const App = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate } = useCreateTask({
+    mutation: {
+      onSuccess: (result) => {
+        queryClient.setQueryData(getListTasksQueryKey(), (prevState: any) => {
+          const prevTaskList = prevState.data.tasks;
+          const nextState = {
+            ...prevState,
+            data: { tasks: [...prevTaskList, result.data.task] },
+          };
+
+          return nextState;
+        });
+      },
+    },
+  });
+
   return (
     <main
       className={style({
@@ -53,6 +79,17 @@ export const App = () => {
         >
           Todo List
         </h1>
+        <Button
+          color="netoral"
+          size="small"
+          className={style({ marginLeft: "15px" })}
+          onClick={(e) => {
+            e.preventDefault();
+            mutate();
+          }}
+        >
+          Create ToDo
+        </Button>
         <Suspense fallback={<div>Now Loading...</div>}>
           <TodoList />
         </Suspense>
