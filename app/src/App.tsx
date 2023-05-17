@@ -30,18 +30,8 @@ const TodoList = () => {
   );
 };
 
-const createTask = async (mutate) => {
-  // const { queryKey, queryFn } = getListTasksQueryOptions();
-  // console.log(queryKey, queryFn);
-  // await queryClient.prefetchQuery({ queryKey, queryFn });
-
-  const res = await mutate();
-  console.log(res);
-};
-
 export const App = () => {
   const queryClient = useQueryClient();
-  const { queryKey } = getListTasksQueryOptions();
 
   const { mutate } = useCreateTask({
     mutation: {
