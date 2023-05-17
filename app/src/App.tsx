@@ -44,8 +44,6 @@ const TodoList = () => {
   return (
     <ul className={style({ marginTop: "25px", paddingLeft: "0" })}>
       {data.data.tasks.map((task) => {
-        const lienThrough = task.finishedAt ? "line-through" : "";
-
         if (task.id === editTodoId) {
           return (
             <li
@@ -122,10 +120,15 @@ const TodoList = () => {
                 className={style({
                   paddingLeft: "15px",
                   listStyle: "none",
-                  textDecorationLine: lienThrough,
                 })}
               >
-                {task.title}
+                <span
+                  style={{
+                    textDecorationLine: task.finishedAt ? "line-through" : "",
+                  }}
+                >
+                  {task.title}
+                </span>
               </p>
             </div>
             <Button
