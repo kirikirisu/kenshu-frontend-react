@@ -29,7 +29,7 @@ const TodoList = () => {
             ...prevState,
             data: { tasks: nextTaskList },
           };
-          setEditTodoId("");
+          setEditTodoId(undefined);
 
           return nextState;
         });
