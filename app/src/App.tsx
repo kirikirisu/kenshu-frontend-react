@@ -40,6 +40,26 @@ const TodoList = () => {
       },
     },
   });
+  const { mutate: deleteTask } = useDeleteTask({
+    mutation: {
+      onSuccess: (_, { taskId }) => {
+        queryClient.setQueryData(getListTasksQueryKey(), (prevState: any) => {
+          const prevTaskList = prevState.data.tasks;
+
+          const nextTaskList = prevTaskList.filter(
+            (task) => task.id !== taskId
+          );
+
+          const nextState = {
+            ...prevState,
+            data: { tasks: nextTaskList },
+          };
+
+          return nextState;
+        });
+      },
+    },
+  });
 
   return (
     <ul className={style({ marginTop: "25px", paddingLeft: "0" })}>
@@ -131,16 +151,29 @@ const TodoList = () => {
                 </span>
               </p>
             </div>
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                setEditTodoId(task.id);
-              }}
-              color="netoral"
-              size="smallest"
-            >
-              編集
-            </Button>
+            <div>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  deleteTask({ taskId: task.id });
+                }}
+                color="netoral"
+                size="smallest"
+                className={style({ marginRight: "5px" })}
+              >
+                削除
+              </Button>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setEditTodoId(task.id);
+                }}
+                color="netoral"
+                size="smallest"
+              >
+                編集
+              </Button>
+            </div>
           </li>
         );
       })}
