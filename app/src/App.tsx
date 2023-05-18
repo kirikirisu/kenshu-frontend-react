@@ -5,13 +5,17 @@ import {
   getListTasksQueryKey,
   useUpdateTask,
   useCreateTask,
+  useDeleteTask,
 } from "./generated";
 import { style } from "@macaron-css/core";
 import { Button } from "./Button";
 
 const TodoList = () => {
-  const { data } = useListTasks();
+  const [editTodoId, setEditTodoId] = useState<string | undefined>();
+  const [inputText, setInputText] = useState<string | undefined>(undefined);
+
   const queryClient = useQueryClient();
+  const { data } = useListTasks();
   const { mutate } = useUpdateTask({
     mutation: {
       onSuccess: (result) => {
@@ -36,9 +40,6 @@ const TodoList = () => {
       },
     },
   });
-
-  const [editTodoId, setEditTodoId] = useState<string | undefined>();
-  const [inputText, setInputText] = useState<string | undefined>(undefined);
 
   return (
     <ul className={style({ marginTop: "25px", paddingLeft: "0" })}>
@@ -99,13 +100,37 @@ const TodoList = () => {
             })}
             key={task.id}
           >
-            <p
-              className={style({
-                listStyle: "none",
-              })}
-            >
-              {task.title}
-            </p>
+            <div className={style({ display: "flex", flexDirection: "row" })}>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  const date = new Date();
+                  mutate({
+                    taskId: task.id,
+                    data: { finishedAt: date.toJSON() },
+                  });
+                }}
+                color="netoral"
+                size="smallest"
+                className={style({ alignSelf: "center" })}
+              >
+                完了
+              </Button>
+              <p
+                className={style({
+                  paddingLeft: "15px",
+                  listStyle: "none",
+                })}
+              >
+                <span
+                  style={{
+                    textDecorationLine: task.finishedAt ? "line-through" : "",
+                  }}
+                >
+                  {task.title}
+                </span>
+              </p>
+            </div>
             <Button
               onClick={(e) => {
                 e.preventDefault();
